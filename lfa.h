@@ -12,7 +12,7 @@
 #include <sys/soundcard.h>
 
 #if 0
-#define dprintf(...) fprintf(stderr, ...)
+#define dprintf fprintf
 #else
 #define dprintf(...)
 #endif

@@ -2,7 +2,7 @@
 
 pa_io_event *mainloop_io_new(pa_mainloop_api *a, int fd, int events, pa_io_event_cb_t cb, void *userdata)
 {
-	dprintf("mainloop_io_new: %p %i %08X %p %p\n", a, fd, events, cb, userdata);
+	dprintf(stderr, "mainloop_io_new: %p %i %08X %p %p\n", a, fd, events, cb, userdata);
 
 	pa_io_event *ret = malloc(sizeof(pa_io_event));
 
@@ -88,7 +88,7 @@ pa_mainloop_api mainloop_api = {
 
 pa_mainloop *pa_mainloop_new(void)
 {
-	dprintf("pa_mainloop_new\n");
+	dprintf(stderr, "pa_mainloop_new\n");
 
 	pa_mainloop *m = malloc(sizeof(pa_mainloop));
 
@@ -102,20 +102,20 @@ pa_mainloop *pa_mainloop_new(void)
 
 void pa_mainloop_free(pa_mainloop *m)
 {
-	dprintf("pa_mainloop_free: %p\n", m);
+	dprintf(stderr, "pa_mainloop_free: %p\n", m);
 	free(m);
 }
 
 pa_mainloop_api *pa_mainloop_get_api(pa_mainloop *m)
 {
-	dprintf("pa_mainloop_get_api: %p\n", m);
+	dprintf(stderr, "pa_mainloop_get_api: %p\n", m);
 
 	return m->api;
 }
 
 int pa_mainloop_iterate(pa_mainloop *m, int block, int *retval)
 {
-	dprintf("pa_mainloop_iterate: %p %i %p\n", m, block, retval);
+	dprintf(stderr, "pa_mainloop_iterate: %p %i %p\n", m, block, retval);
 
 	pa_context *c = m->c;
 
@@ -135,7 +135,7 @@ int pa_mainloop_iterate(pa_mainloop *m, int block, int *retval)
 
 int pa_mainloop_run(pa_mainloop *m, int *retval)
 {
-	dprintf("pa_mainloop_run: %p %p\n", m, retval);
+	dprintf(stderr, "pa_mainloop_run: %p %p\n", m, retval);
 
 	int ret = 0;
 

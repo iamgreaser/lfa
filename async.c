@@ -62,13 +62,13 @@ pa_channel_map *pa_channel_map_init_auto(pa_channel_map *m, unsigned channels, i
 
 const char *pa_get_library_version(void)
 {
-	dprintf("pa_get_library_version\n");
+	dprintf(stderr, "pa_get_library_version\n");
 	return "5.0.0";
 }
 
 const char *pa_strerror(int error)
 {
-	dprintf("pa_strerror\n");
+	dprintf(stderr, "pa_strerror\n");
 	return "IT BROKE";
 }
 
@@ -128,7 +128,7 @@ char *pa_path_get_filename(const char *p)
 
 char *pa_get_binary_name(char *s, size_t l)
 {
-	dprintf("pa_get_binary_name: %s %i\n", s, (int)l);
+	dprintf(stderr, "pa_get_binary_name: %s %i\n", s, (int)l);
 
 	// TODO!
 	return NULL;

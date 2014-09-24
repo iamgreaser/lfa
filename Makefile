@@ -12,6 +12,7 @@ CFILES = \
 	operation.c \
 	stream.c \
 	threaded.c \
+	xmalloc.c \
 	\
 	simple.c \
 	#
