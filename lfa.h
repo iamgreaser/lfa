@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include <pthread.h>
+#include <signal.h>
 #include <fcntl.h>
 
 #include <sys/soundcard.h>
@@ -153,6 +155,8 @@ enum
 	PA_CHANNEL_POSITION_MAX,
 };
 
+typedef uint64_t pa_usec_t;
+
 typedef struct pa_sample_spec
 {
 	int format;
@@ -190,11 +194,13 @@ typedef int pa_simple;
 pa_simple *pa_simple_new(const char *server, const char *name, int dir, const char *dev, const char *stream_name, const pa_sample_spec *ss, const pa_channel_map *map, const pa_buffer_attr *attr, int *error);
 void pa_simple_free(pa_simple *pa);
 int pa_simple_drain(pa_simple *pa, int *error);
+int pa_simple_flush(pa_simple *pa);
 int pa_simple_write(pa_simple *pa, const void *data, size_t bytes, int *error);
 
 // Async API
 typedef struct pa_mainloop_api pa_mainloop_api;
 typedef struct pa_mainloop pa_mainloop;
+typedef struct pa_threaded_mainloop pa_threaded_mainloop;
 
 // Async API: Proplist
 typedef struct pa_proplist
@@ -297,6 +303,13 @@ struct pa_mainloop
 	pa_mainloop_api *api;
 };
 
+struct pa_threaded_mainloop
+{
+	pthread_t pthread;
+	int retval;
+	pa_mainloop *main;
+};
+
 typedef void(*pa_io_event_cb_t)(pa_mainloop_api *a, pa_io_event *e, int fd, int events, void *userdata);
 typedef void(*pa_io_event_destroy_cb_t)(pa_mainloop_api *a, pa_io_event *e, void *userdata);
 typedef void(*pa_time_event_cb_t)(pa_mainloop_api *a, pa_time_event *e, const struct timeval *tv, void *userdata);
@@ -323,4 +336,9 @@ struct pa_mainloop_api
 	
 	pa_mainloop *m;
 };
+
+pa_mainloop *pa_mainloop_new(void);
+void pa_mainloop_free(pa_mainloop *m);
+int pa_mainloop_run(pa_mainloop *m, int *retval);
+pa_mainloop_api *pa_mainloop_get_api(pa_mainloop *m);
 

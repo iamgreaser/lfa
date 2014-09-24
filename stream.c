@@ -1,5 +1,11 @@
 #include "lfa.h"
 
+size_t pa_stream_readable_size(pa_stream *s)
+{
+	dprintf("pa_stream_readable_size: %p\n", s);
+	return (1<<20); // 1MB should be enough
+}
+
 size_t pa_stream_writable_size(pa_stream *s)
 {
 	dprintf("pa_stream_writable_size: %p\n", s);
@@ -43,6 +49,50 @@ int pa_stream_cancel_write(pa_stream *s)
 	return 0;
 }
 
+pa_operation *pa_stream_cork(pa_stream *s, int b, pa_stream_success_cb_t cb, void *userdata)
+{
+	dprintf("pa_stream_cork: %p\n", s);
+
+	// TODO
+
+	pa_operation *o = malloc(sizeof(pa_operation));
+	o->refs = 1;
+	o->state = PA_OPERATION_DONE;
+	return o;
+}
+
+pa_operation *pa_stream_trigger(pa_stream *s, pa_stream_success_cb_t cb, void *userdata)
+{
+	dprintf("pa_stream_trigger: %p\n", s);
+
+	// TODO
+
+	pa_operation *o = malloc(sizeof(pa_operation));
+	o->refs = 1;
+	o->state = PA_OPERATION_DONE;
+	return o;
+}
+
+int pa_stream_drop(pa_stream *s)
+{
+	dprintf("pa_stream_drop: %p\n", s);
+
+	// TODO: recording
+
+	return 0;
+}
+
+int pa_stream_peek(pa_stream *s, const void **data, size_t *nbytes)
+{
+	dprintf("pa_stream_peek: %p %p %p\n", s, data, nbytes);
+
+	// TODO: recording
+	if(data   != NULL) *data   = NULL;
+	if(nbytes != NULL) *nbytes = 0;
+
+	return 0;
+}
+
 int pa_stream_get_state(pa_stream *s)
 {
 	dprintf("pa_stream_get_state: %p\n", s);
@@ -53,6 +103,16 @@ pa_operation *pa_stream_drain(pa_stream *s, pa_stream_success_cb_t cb, void *use
 {
 	dprintf("pa_stream_drain: %p %p %p\n", s, cb, userdata);
 	pa_simple_drain(s->fd, NULL);
+	pa_operation *o = malloc(sizeof(pa_operation));
+	o->refs = 1;
+	o->state = PA_OPERATION_DONE;
+	return o;
+}
+
+pa_operation *pa_stream_flush(pa_stream *s, pa_stream_success_cb_t cb, void *userdata)
+{
+	dprintf("pa_stream_flush: %p %p %p\n", s, cb, userdata);
+	pa_simple_flush(s->fd);
 	pa_operation *o = malloc(sizeof(pa_operation));
 	o->refs = 1;
 	o->state = PA_OPERATION_DONE;
@@ -94,6 +154,20 @@ pa_stream *pa_stream_new_with_proplist(pa_context *c, const char *name, const pa
 pa_stream *pa_stream_new(pa_context *c, const char *name, const pa_sample_spec *ss, const pa_channel_map *map)
 {
 	return pa_stream_new_with_proplist(c, name, ss, map, NULL);
+}
+
+int pa_stream_connect_record(pa_stream *s, const char *dev, const pa_buffer_attr *attr, int flags)
+{
+	dprintf("pa_stream_connect_record: %p %s %p %08X\n", s, dev, attr, flags);
+
+	s->fire_connect = 1;
+	s->started = 1;
+
+	s->fd = pa_simple_new(NULL, s->name, PA_STREAM_RECORD, NULL, s->name, &(s->ss), NULL, NULL, NULL);
+	if(s->fd == NULL)
+		return -1;
+
+	return 0;
 }
 
 int pa_stream_connect_playback(pa_stream *s, const char *dev, const pa_buffer_attr *attr, int flags, const pa_cvolume *volume, pa_stream *sync_stream)
@@ -153,6 +227,11 @@ void pa_stream_unref(pa_stream *s)
 	}
 }
 
+int pa_stream_get_latency(pa_stream *s, pa_usec_t *r_usec, int *negative)
+{
+	return -1;
+}
+
 void pa_stream_set_event_callback(pa_stream *s, pa_stream_event_cb_t cb, void *userdata)
 {
 	dprintf("pa_stream_set_event_callback: %p %p %p\n", s, cb, userdata);
@@ -199,6 +278,12 @@ void pa_stream_set_suspended_callback(pa_stream *s, pa_stream_notify_cb_t cb, vo
 {
 	dprintf("pa_stream_set_suspended_callback: %p %p %p\n", s, cb, userdata);
 	s->suspended_cb = cb;
+}
+
+void pa_stream_set_latency_update_callback(pa_stream *s, pa_stream_notify_cb_t cb, void *userdata)
+{
+	dprintf("pa_stream_set_latency_update_callback: %p %p %p\n", s, cb, userdata);
+	// TODO: cb
 }
 
 void pa_stream_set_read_callback(pa_stream *s, pa_stream_request_cb_t cb, void *userdata)

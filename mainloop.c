@@ -142,6 +142,9 @@ int pa_mainloop_run(pa_mainloop *m, int *retval)
 	while((ret = pa_mainloop_iterate(m, 1, retval)) >= 0)
 		;
 
+	if(retval != NULL)
+		*retval = ret;
+
 	return ret;
 }
 

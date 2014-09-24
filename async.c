@@ -72,4 +72,66 @@ const char *pa_strerror(int error)
 	return "IT BROKE";
 }
 
+size_t pa_sample_size_of_format(int f)
+{
+	switch(f)
+	{
+		case PA_SAMPLE_U8:
+		case PA_SAMPLE_ALAW:
+		case PA_SAMPLE_ULAW:
+			return 1;
+
+		case PA_SAMPLE_S16LE:
+		case PA_SAMPLE_S16BE:
+			return 2;
+
+		case PA_SAMPLE_S24LE:
+		case PA_SAMPLE_S24BE:
+			return 3;
+
+		case PA_SAMPLE_S24_32LE:
+		case PA_SAMPLE_S24_32BE:
+		case PA_SAMPLE_FLOAT32LE:
+		case PA_SAMPLE_FLOAT32BE:
+		case PA_SAMPLE_S32LE:
+		case PA_SAMPLE_S32BE:
+			return 4;
+
+		default:
+			return 1;
+	}
+}
+
+size_t pa_sample_size(const pa_sample_spec *spec)
+{
+	return spec->channels * pa_sample_size_of_format(spec->format);
+}
+
+size_t pa_usec_to_bytes(pa_usec_t t, const pa_sample_spec *spec)
+{
+	return (size_t)(((t * spec->rate) / (uint64_t)1000000) * pa_sample_size(spec));
+}
+
+char *pa_path_get_filename(const char *p)
+{
+	const char *v;
+
+	if(p == NULL) return NULL;
+
+	for(v = p + strlen(p) - 1; v >= p; v--)
+		if(*v == '/')
+			break;
+
+	v++;
+	return strdup(v);
+}
+
+char *pa_get_binary_name(char *s, size_t l)
+{
+	dprintf("pa_get_binary_name: %s %i\n", s, (int)l);
+
+	// TODO!
+	return NULL;
+}
+
 

@@ -11,6 +11,7 @@ CFILES = \
 	mainloop.c \
 	operation.c \
 	stream.c \
+	threaded.c \
 	\
 	simple.c \
 	#
