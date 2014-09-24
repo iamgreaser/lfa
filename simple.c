@@ -25,7 +25,7 @@ pa_simple *pa_simple_new(const char *server, const char *name, int dir, const ch
 	(void)map;
 	(void)attr;
 
-	fprintf(stderr, "pa_simple_new wrapper, proudly served by LFA\n");
+	fprintf(stderr, "pa_simple_new OSS wrapper, proudly served by LFA\n");
 
 	/* check format spec */
 	if(ss == NULL) return NULL;

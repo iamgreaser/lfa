@@ -21,7 +21,8 @@ int pa_stream_write(pa_stream *s, const void *data, size_t nbytes, pa_free_cb_t 
 {
 	//dprintf("pa_stream_write: %p %p %i %p %i %i\n", s, data, (int)nbytes, free_cb, (int)offset, seekmode);
 
-	write(s->fd, data, nbytes);
+	// XXX: handle offset?
+	pa_simple_write(s->fd, data, nbytes, NULL);
 
 	if(data == s->bufdata)
 	{
@@ -51,6 +52,7 @@ int pa_stream_get_state(pa_stream *s)
 pa_operation *pa_stream_drain(pa_stream *s, pa_stream_success_cb_t cb, void *userdata)
 {
 	dprintf("pa_stream_drain: %p %p %p\n", s, cb, userdata);
+	pa_simple_drain(s->fd, NULL);
 	pa_operation *o = malloc(sizeof(pa_operation));
 	o->refs = 1;
 	o->state = PA_OPERATION_DONE;
@@ -84,7 +86,7 @@ pa_stream *pa_stream_new_with_proplist(pa_context *c, const char *name, const pa
 	s->fire_connect = 0;
 	s->started = 0;
 
-	s->fd = -1;
+	s->fd = NULL;
 
 	return s;
 }
@@ -103,44 +105,9 @@ int pa_stream_connect_playback(pa_stream *s, const char *dev, const pa_buffer_at
 	s->fire_connect = 1;
 	s->started = 1;
 
-	int fmt;
-	int stereo;
-
-	/* check format spec */
-	switch(s->ss.format)
-	{
-		case PA_SAMPLE_U8:
-			fmt = AFMT_U8;
-			break;
-		case PA_SAMPLE_S16LE:
-			fmt = AFMT_S16_LE;
-			break;
-		case PA_SAMPLE_S16BE:
-			fmt = AFMT_S16_BE;
-			break;
-		default:
-			/* seriously why the fuck would you want anything else you Vorpal */
-			return -1;
-	}
-
-	switch(s->ss.channels)
-	{
-		case 1:
-			stereo = 0;
-			break;
-		case 2:
-			stereo = 1;
-			break;
-		default:
-			/* i'd like to just keep this simpleish */
-			return -1;
-	}
-
-	s->fd = open("/dev/dsp", O_WRONLY);
-	ioctl(s->fd, SNDCTL_DSP_SPEED, &(s->ss.rate));
-	ioctl(s->fd, SNDCTL_DSP_SETFMT, &fmt);
-	ioctl(s->fd, SNDCTL_DSP_STEREO, &stereo);
-	s->c->s = s;
+	s->fd = pa_simple_new(NULL, s->name, PA_STREAM_PLAYBACK, NULL, s->name, &(s->ss), NULL, NULL, NULL);
+	if(s->fd == NULL)
+		return -1;
 
 	return 0;
 }
@@ -152,11 +119,11 @@ int pa_stream_disconnect(pa_stream *s)
 	if(s == NULL)
 		return -1;
 
-	if(s->fd == -1)
+	if(s->fd == NULL)
 		return 0;
 
-	close(s->fd);
-	s->fd = -1;
+	pa_simple_free(s->fd);
+	s->fd = NULL;
 	s->fire_connect = 0;
 	s->started = 0;
 
@@ -181,6 +148,7 @@ void pa_stream_unref(pa_stream *s)
 	if(s->refs == 0)
 	{
 		pa_stream_disconnect(s);
+		if(s->name != NULL) free(s->name);
 		free(s);
 	}
 }
