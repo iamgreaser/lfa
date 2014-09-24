@@ -1,6 +1,20 @@
 CFLAGS = -g -O2
 LDFLAGS = -g -O2
 
+INCLUDES = \
+	lfa.h \
+	#
+
+CFILES = \
+	async.c \
+	context.c \
+	mainloop.c \
+	operation.c \
+	stream.c \
+	\
+	simple.c \
+	#
+
 SYMLINKS = \
 	libpulse-simple.so.0 \
 	libpulse.so.0 \
@@ -12,8 +26,8 @@ clean:
 	rm -f liblfa.so
 	rm -f $(SYMLINKS)
 
-liblfa.so: async.c simple.c lfa.h
-	$(CC) -shared -fPIC $(CFLAGS) -o liblfa.so async.c simple.c $(LDFLAGS)
+liblfa.so: $(CFILES) $(INCLUDES)
+	$(CC) -shared -fPIC $(CFLAGS) -o liblfa.so $(CFILES) $(LDFLAGS)
 
 # Symlinks
 libpulse-simple.so.0: liblfa.so

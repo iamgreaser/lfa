@@ -1,3 +1,20 @@
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <errno.h>
+
+#include <fcntl.h>
+
+#include <sys/soundcard.h>
+
+#if 0
+#define dprintf(...) fprintf(stderr, ...)
+#else
+#define dprintf(...)
+#endif
+
 enum
 {
 	PA_SAMPLE_U8,
